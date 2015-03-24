@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+    <div id="cal"></div>
+</body>
+<link rel="stylesheet" type="text/css" href="style.css">
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="cal.js"></script>
+<script>
+
+var calendar = cal('#cal');
+
+calendar.add_event({id: 0, day: 'Mon', start: 2*60, duration: 4*60});
+calendar.add_event({id: 1, day: 'Mon', start: 3*60, duration: 30});
+
+</script>

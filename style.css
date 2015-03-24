@@ -1,0 +1,54 @@
+.xaxis {
+ position: absolute;
+ top: 0;
+ height: 1em;
+ left: 2em;
+ right: 1em;
+ background-color: lightBlue;
+ text-align: center;
+}
+
+.yaxis {
+ position: absolute;
+ top: 1em;
+ left: 0em;
+ width: 2em;
+ height: 23em;
+ background-color: lightGreen;
+}
+
+.page {
+ position: absolute;
+ top: 1em;
+ left: 2em;
+ right: 1em;
+ height: 23em;
+ background-color: lightGrey;
+}
+
+.event_container {
+ position: absolute;
+ top: 0;
+ bottom: 0;
+ left: 0;
+ right: 0;
+ background-color: white;
+ border: 1px solid black;
+}
+
+.tick {
+ position: absolute;
+ top: 0;
+ bottom: 0;
+ left: 0;
+ right: 0;
+}
+
+.event_bottom {
+ position: absolute;
+ bottom: 0;
+ width: 100%;
+ height: 2px;
+ background-color: black;
+ cursor: row-resize;
+}
