@@ -1,5 +1,6 @@
 function cal(id){
 
+    // D3 setup.
     var data = [];
 
     var cal = d3.select(id);
@@ -39,6 +40,7 @@ function cal(id){
             return d;
         });
 
+    // Drag behaviour for draging and resizeing calendar events.
     var resizebehaviour = d3.behavior.drag()
         .on('dragstart', function(d){
             d3.event.sourceEvent.stopPropagation();
@@ -47,7 +49,7 @@ function cal(id){
             resize_event(d, d3.select(this.parentNode))
         })
         .on('dragend', function(d){
-            resize_end_event(d, d3.select(this.parentNode))
+            resizeend_event(d, d3.select(this.parentNode))
         });
 
     var dragbehaviour = d3.behavior.drag()
@@ -59,6 +61,7 @@ function cal(id){
         resize_everything();
     });
 
+    // Update data.
     var add_event = function(event){
         data.push(event);
 
@@ -88,6 +91,7 @@ function cal(id){
         resize_everything();
     }
 
+    // Resize gui.
     var resize_everything = function(){
         var w = parseInt(page.style('width'));
         var h = parseInt(page.style('height'))
@@ -128,6 +132,9 @@ function cal(id){
         });
     };
 
+    // The drag events. Update gui on 'drag' events. Snap-to-grid and
+    // update data on 'dragend' events.
+
     var drag_event = function(d, div){
         var x = d3.event.x;
         var y = d3.event.y;
@@ -149,6 +156,7 @@ function cal(id){
         var elem_width = x_scale.rangeBand();
         var elem_height = parseInt(div.style('height'));
 
+        // Find nearest day to snap to.
         var i = 0;
         while(x+elem_width/2 > range[i]){ i++; }
         x = i==0 ? range[0] : range[i-1];
@@ -176,7 +184,7 @@ function cal(id){
         div.style('height', d3.event.y + 'px');
     };
 
-    var resize_end_event = function(d, div){
+    var resizeend_event = function(d, div){
         d.duration = y_scale.invert(parseInt(div.style('height')));
     };
 
