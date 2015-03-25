@@ -168,7 +168,7 @@ function cal(id){
         if(top0 <= 0){
             top1 = '0px';
         } else if (top0+elem_height >= height) {
-            top1 = '22em';
+            top1 = (height - elem_height)+'px';
         }
 
         div.style({
@@ -181,7 +181,12 @@ function cal(id){
     };
 
     var resize_event = function(d, div){
-        div.style('height', d3.event.y + 'px');
+        var y = d3.event.y;
+        var height = parseInt(page.style('height'));
+        var top = parseInt(div.style('top'));
+        if (y <= (height-top)){
+            div.style('height', d3.event.y + 'px');
+        }
     };
 
     var resizeend_event = function(d, div){
