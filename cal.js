@@ -30,6 +30,8 @@ function cal(id){
         .append('div')
         .attr('class', 'tick');
 
+    var color = d3.scale.category10();
+
     y_tick.append('span')
         .text(function(d){
             return d/60 + ':00';
@@ -46,16 +48,19 @@ function cal(id){
             d3.event.sourceEvent.stopPropagation();
         })
         .on('drag', function(d){
-            resize_event(d, d3.select(this.parentNode))
+            resize_event(d, d3.select(this.parentNode));
         })
         .on('dragend', function(d){
-            resizeend_event(d, d3.select(this.parentNode))
+            resizeend_event(d, d3.select(this.parentNode));
+            ease();
         });
 
     var dragbehaviour = d3.behavior.drag()
         .on('drag', function(d){ drag_event(d, d3.select(this)) })
-        .on('dragend', function(d){ dragend_event(d, d3.select(this)) });
-
+        .on('dragend', function(d){
+            dragend_event(d, d3.select(this));
+            ease();
+        });
 
     d3.select(window).on('resize', function(){
         resize_everything();
@@ -74,7 +79,14 @@ function cal(id){
 
         var event_container = eventEnter.append('div')
             .attr('class', function(d){
-                return 'event_container ' + 'event_id'+d.id})
+                return 'event_container'
+            })
+            .style('background-color', function(d){
+                return color(d.id);
+            })
+            .attr('id', function(d){
+                return  'event_id'+d.id;
+            })
             .on('click', function(d){
                 console.log(d);
             });
@@ -82,7 +94,7 @@ function cal(id){
         var event_bottom = event_container.append('div')
             .attr('class', 'event_bottom')
             .on('click', function(d){
-                console.log('bottom', d);
+                //console.log('bottom', d);
             });
 
         event_container.call(dragbehaviour);
@@ -124,12 +136,12 @@ function cal(id){
 
         x_tick.style({
             left: function(d) {
-                console.log(d)
                 return x_scale(d) + 'px'
             },
             width: x_scale.rangeBand() + 'px',
             height: '1em',
         });
+        ease();
     };
 
     // The drag events. Update gui on 'drag' events. Snap-to-grid and
@@ -153,7 +165,7 @@ function cal(id){
     var dragend_event = function(d, div){
         var x = parseInt(div.style('left'));
         var range = x_scale.range();
-        var elem_width = x_scale.rangeBand();
+        var elem_width = parseInt(div.style('width'));
         var elem_height = parseInt(div.style('height'));
 
         // Find nearest day to snap to.
@@ -193,6 +205,73 @@ function cal(id){
         d.duration = y_scale.invert(parseInt(div.style('height')));
     };
 
+    var ease = function(){
+        // Nest by day.
+        var nested = d3.nest()
+            .key(function(d) { return d.day; })
+            .entries(data);
+
+
+        nested.forEach(function(n){
+            // Sort in O(nlogn).
+            var data = n.values;
+            data.sort(function(a,b){
+                var start0 = a.start;
+                var start1 = b.start;
+                if(start0 < start1){ return -1;}
+                if(start0 > start1){ return 1;}
+                return 0;
+            });
+
+            // Find islands in O(n).
+            var i = 0;
+            var d = data[i];
+            // Init first island.
+            var islands = [{set: d3.set([d.id]), max: d.start + d.duration}];
+            for(i=1,j=0; i < data.length; i++){
+                d = data[i];
+                var current_island = islands[j];
+                var max = current_island.max;
+                if(d.start <= max){
+                    current_island.set.add(d.id);
+                    current_island.max = d3.max([d.start+d.duration,max]);
+                } else { // End of island found.
+                    j++;
+                    islands.push({set: d3.set([d.id]), max: d.start+d.duration});
+                }
+            }
+
+            islands.forEach(function(d){
+                var ids = d.set.values();
+                // Full size if only one event.
+                if(ids.length == 1){
+                    var id = ids[0];
+                    d3.selectAll('#event_id'+id)
+                        .style({
+                            left: function(d){
+                                return x_scale(d.day) + 'px';
+                            },
+                            width: function(){
+                                return x_scale.rangeBand() + 'px';
+                            }
+                        })
+                } else { // Size depends on number of events.
+                    var new_band = x_scale.rangeBand()/ids.length;
+                    ids.forEach(function(id,i){
+                        d3.selectAll('#event_id'+id)
+                            .style({
+                                left: function(d){
+                                    return x_scale(d.day) + new_band*i + 'px';
+                                },
+                                width: function(){
+                                    return (new_band - 4) + 'px';
+                                }
+                            });
+                    });
+                }
+            });
+        })
+    }
     return {
         add_event: add_event
     }
