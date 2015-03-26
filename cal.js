@@ -220,37 +220,46 @@ function cal(id){
             .key(function(d) { return d.day; })
             .entries(data);
 
+        // Get values from nest
+        var values = nested.map(function(n) { return n.values});
 
-        nested.forEach(function(n){
-            // Sort in O(nlogn).
-            var data = n.values;
-            data.sort(function(a,b){
+        // Sort by start time
+        values.forEach(function(l) {
+            l.sort(function(a,b){
                 var start0 = a.start;
                 var start1 = b.start;
                 if(start0 < start1){ return -1;}
                 if(start0 > start1){ return 1;}
                 return 0;
-            });
+            })
+        });
 
-            // Find islands in O(n).
+        // Find islands in O(n).
+        var islands_per_day = [];
+        values.forEach(function(data){
             var i = 0;
             var d = data[i];
-            // Init first island.
             var islands = [{set: d3.set([d.id]), max: d.start + d.duration}];
+            // Init first island.
             for(i=1,j=0; i < data.length; i++){
                 d = data[i];
                 var current_island = islands[j];
                 var max = current_island.max;
                 if(d.start <= max){
-                    current_island.set.add(d.id);
+                current_island.set.add(d.id);
                     current_island.max = d3.max([d.start+d.duration,max]);
                 } else { // End of island found.
                     j++;
                     islands.push({set: d3.set([d.id]), max: d.start+d.duration});
                 }
             }
+            islands_per_day.push(islands);
 
-            islands.forEach(function(d){
+        });
+
+        // Resize.
+        islands_per_day.forEach(function(d){
+            d.forEach(function(d){
                 var ids = d.set.values();
                 // Full size if only one event.
                 if(ids.length == 1){
@@ -262,7 +271,7 @@ function cal(id){
                             },
                             width: function(){
                                 return x_scale.rangeBand() + 'px';
-                            }
+                        }
                         })
                 } else { // Size depends on number of events.
                     var new_band = x_scale.rangeBand()/ids.length;
@@ -279,8 +288,9 @@ function cal(id){
                     });
                 }
             });
-        })
-    }
+        });
+    };
+
     return {
         add_event: add_event
     }
