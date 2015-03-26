@@ -92,7 +92,7 @@ function cal(id){
                 return  'event_id'+d.id;
             })
             .on('click', function(d){
-                console.log(d);
+                //console.log(d);
             });
 
         var event_bottom = event_container.append('div')
@@ -172,7 +172,15 @@ function cal(id){
         // Find nearest day to snap to.
         var i = 0;
         while(x+elem_width/2 > range[i]){ i++; }
-        x = i==0 ? range[0] : range[i-1];
+        var day = 'Mon';
+
+        if(i==0){
+            x = range[0];
+            day = x_scale.domain()[0];
+        } else {
+            x = range[i-1];
+            day = x_scale.domain()[i-1];
+        }
 
         var top = div.style('top');
         var height = parseInt(page.style('height'));
@@ -189,7 +197,7 @@ function cal(id){
             top: function(){ return top1 }
         });
 
-        d.day = x_scale.domain()[i-1];
+        d.day = day;
         d.start = y_scale.invert(top0);
     };
 
