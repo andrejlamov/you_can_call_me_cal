@@ -224,7 +224,7 @@ function cal(id){
         var values = nested.map(function(n) { return n.values});
 
         // Sort by start time
-        values.forEach(function(l) {
+        var sort =function(l) {
             l.sort(function(a,b){
                 var start0 = a.start;
                 var start1 = b.start;
@@ -232,61 +232,75 @@ function cal(id){
                 if(start0 > start1){ return 1;}
                 return 0;
             })
-        });
+            return l;
+        };
+        values.forEach(sort);
 
-        // Find islands in O(n).
-        var islands_per_day = [];
-        values.forEach(function(data){
+        // Find islands.
+        var global_islands = [];
+        values.forEach(function(events){
             var i = 0;
-            var d = data[i];
-            var islands = [{set: d3.set([d.id]), max: d.start + d.duration}];
+            var d = events[i];
+            var k = d.id;
             // Init first island.
-            for(i=1,j=0; i < data.length; i++){
-                d = data[i];
-                var current_island = islands[j];
-                var max = current_island.max;
+            var isle =  {set:{}, max:  d.start + d.duration};
+            isle.set[d.id] = d;
+            var local_islands = [isle];
+            // Find all islands.
+            for(i=1,j=0; i < events.length; i++){
+                d = events[i];
+                var current_isle = local_islands[j];
+                var max = current_isle.max;
                 if(d.start <= max){
-                current_island.set.add(d.id);
-                    current_island.max = d3.max([d.start+d.duration,max]);
+                    var k = d.id;
+                    current_isle.set[k] = d;
+                    current_isle.max = d3.max([d.start+d.duration,max]);
                 } else { // End of island found.
                     j++;
-                    islands.push({set: d3.set([d.id]), max: d.start+d.duration});
+                    var isle = {set:{}, max:  d.start + d.duration};
+                    isle.set[d.id] = d;
+                    local_islands.push(isle);
                 }
             }
-            islands_per_day.push(islands);
-
+            global_islands.push(local_islands);
         });
 
-        // Resize.
-        islands_per_day.forEach(function(d){
-            d.forEach(function(d){
-                var ids = d.set.values();
-                // Full size if only one event.
-                if(ids.length == 1){
-                    var id = ids[0];
-                    d3.selectAll('#event_id'+id)
+        // Greedy packing.
+        global_islands.forEach(function(local){
+            local.forEach(function(isle){
+                var sorted = sort(d3.values(isle.set));
+                var ids = sorted.map(function(d) { return {id: d.id, x: 0 }});
+                // Store taken heights (value) for each column (index).
+                var taken_heights = ids.map(function(){ return 0; });
+                // Store number of used columns.
+                var taken_columns = 1;
+
+                // For each event...
+                for(i=0; i < sorted.length; i++){
+                    d = sorted[i];
+                    // find first column with free space.
+                    for(j=0; j < taken_heights.length; j++){
+                        if(d.start >= taken_heights[j]){
+                            taken_heights[j] = d.start+d.duration;
+                            ids[i].x = j;
+                            taken_columns = d3.max([taken_columns, j+1]);
+                            break;
+                        }
+                    }
+                }
+                // Fill whole x_scale band with packed events.
+                var new_band = x_scale.rangeBand()/taken_columns;
+                ids.forEach(function(id){
+                    d3.select('#event_id'+id.id)
                         .style({
                             left: function(d){
-                                return x_scale(d.day) + 'px';
+                                return x_scale(d.day) + new_band*id.x + 'px';
                             },
                             width: function(){
-                                return x_scale.rangeBand() + 'px';
-                        }
-                        })
-                } else { // Size depends on number of events.
-                    var new_band = x_scale.rangeBand()/ids.length;
-                    ids.forEach(function(id,i){
-                        d3.selectAll('#event_id'+id)
-                            .style({
-                                left: function(d){
-                                    return x_scale(d.day) + new_band*i + 'px';
-                                },
-                                width: function(){
-                                    return (new_band - 4) + 'px';
-                                }
-                            });
-                    });
-                }
+                                return (new_band - 4) + 'px';
+                            }
+                        });
+                });
             });
         });
     };
