@@ -3,18 +3,33 @@
  top: 0;
  height: 1em;
  left: 2em;
- right: 1em;
- background-color: lightBlue;
+ right: 2em;
+ background-color: white;
  text-align: center;
+}
+
+.container {
+ position: absolute;
+ top: 1em;
+ left: 1em;
+ right: 1em;
+}
+
+.y_cal_container {
+ overflow: scroll;
+ position: absolute;
+ top: 0;
+ left: 0em;
+ height: 100%;
+ right: 0;
 }
 
 .yaxis {
  position: absolute;
  top: 1em;
  left: 0em;
- width: 2em;
+ right: 0em;
  height: 23em;
- background-color: lightGreen;
 }
 
 .page {
@@ -23,7 +38,6 @@
  left: 2em;
  right: 1em;
  height: 23em;
- background-color: lightGrey;
 }
 
 .event_container {
@@ -39,9 +53,22 @@
 .tick {
  position: absolute;
  top: 0;
- bottom: 0;
  left: 0;
- right: 0;
+ right: 1em;
+}
+
+.ytick {
+ position: absolute;
+ left: 0;
+ right: 1em;
+ height: 1em;
+}
+
+.ytick:nth-child(even) {
+ background-color: white;
+}
+.ytick:nth-child(odd) {
+ background-color: #F8F8F8;
 }
 
 .event_bottom {

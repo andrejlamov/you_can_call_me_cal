@@ -5,12 +5,17 @@ function cal(id){
 
     var cal = d3.select(id);
 
-    var yaxis = cal.append('div')
+    var container = cal.append('div')
+       .attr('class', 'y_cal_container');
+
+    var yaxis = container.append('div')
         .attr('class', 'yaxis');
+
+    var page = container.append('div')
+        .attr('class', 'page');
+
     var xaxis = cal.append('div')
         .attr('class', 'xaxis');
-    var page = cal.append('div')
-        .attr('class', 'page');
 
     var x_scale = d3.scale.ordinal()
         .domain(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
@@ -18,11 +23,11 @@ function cal(id){
     var y_scale = d3.scale.linear()
         .domain([0, 60*24]);
 
-    var y_tick = yaxis.selectAll('.tick')
+    var y_tick = yaxis.selectAll('.ytick')
         .data(d3.range(0, 24*60, 60))
         .enter()
         .append('div')
-        .attr('class', 'tick');
+        .attr('class', 'ytick');
 
     var x_tick = xaxis.selectAll('.tick')
         .data(x_scale.domain())
@@ -32,10 +37,9 @@ function cal(id){
 
     var color = d3.scale.category10();
 
-    y_tick.append('span')
-        .text(function(d){
-            return d/60 + ':00';
-        });
+    y_tick.append('span').text(function(d){
+      return (d/60) + ':00';
+    });
 
     x_tick.append('span')
         .text(function(d){
@@ -127,19 +131,16 @@ function cal(id){
             });
 
         y_tick.style({
-            top: function(d){
-                return y_scale(d) + 'px';
-            },
-            height: '1em',
-            width: '2em'
+            top: function(d,i){
+                return i + 'em';
+            }
         });
 
         x_tick.style({
             left: function(d) {
                 return x_scale(d) + 'px'
             },
-            width: x_scale.rangeBand() + 'px',
-            height: '1em',
+            width: x_scale.rangeBand() + 'px'
         });
         ease();
     };
