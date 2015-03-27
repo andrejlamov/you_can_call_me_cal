@@ -1,9 +1,14 @@
 function cal(id){
 
-    // D3 setup.
+    // Data.
     var data = [];
+    var current_week = moment().week();
 
+    // D3 setup.
     var cal = d3.select(id);
+
+    var toolbar = cal.append('div')
+        .attr('class', 'toolbar');
 
     var container = cal.append('div')
        .attr('class', 'y_cal_container');
@@ -45,6 +50,19 @@ function cal(id){
         .text(function(d){
             return d;
         });
+
+    var x0;
+    xaxis.on('touchstart', function(){
+        x0 = d3.event.changedTouches[0].clientX;
+    }).on('touchend', function(){
+        var x1 = d3.event.changedTouches[0].clientX;
+        if(x1 > x0){
+            current_week++;
+        } else {
+            current_week--;
+        }
+        toolbar.text(current_week)
+    });
 
     // Drag behaviour for draging and resizeing calendar events.
     var resizebehaviour = d3.behavior.drag()
@@ -325,6 +343,10 @@ function cal(id){
         });
     };
 
+    // Init cal.
+    resize_everything();
+
+    // Return object.
     return {
         add_event: add_event
     }
