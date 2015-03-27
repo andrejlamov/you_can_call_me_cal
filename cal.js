@@ -63,8 +63,8 @@ function cal(id){
             var parent = d3.select(this.parentNode);
             var div = d3.select(this);
             parent.classed('selected', false);
-            parent.style('z-index', 0);
-            div.style('z-index', 0);
+            parent.style('z-index', 'auto');
+            div.style('z-index', 'auto');
             resizeend_event(d, parent);
             ease();
         });
@@ -78,10 +78,11 @@ function cal(id){
         })
         .on('drag', function(d){
             drag_event(d, d3.select(this));
+            console.log(d3.event.x, d3.event.y);
         })
         .on('dragend', function(d){
             var div = d3.select(this);
-            div.style('z-index', 0);
+            div.style('z-index', 'auto');
             div.classed('selected', false);
             dragend_event(d, div);
             ease();
