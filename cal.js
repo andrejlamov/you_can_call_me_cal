@@ -182,23 +182,21 @@ function cal(id){
             day = x_scale.domain()[i-1];
         }
 
-        var top = div.style('top');
+        var top = parseInt(div.style('top'));
         var height = parseInt(page.style('height'));
-        var top0 = parseInt(top);
-        var top1 = top;
-        if(top0 <= 0){
-            top1 = '0px';
-        } else if (top0+elem_height >= height) {
-            top1 = (height - elem_height)+'px';
+        if(top <= 0){
+            top = 0;
+        } else if (top+elem_height >= height) {
+            top = (height - elem_height);
         }
 
         div.style({
             left: function(){ return x + 'px'; },
-            top: function(){ return top1 }
+            top: function(){ return top + 'px'; }
         });
 
         d.day = day;
-        d.start = y_scale.invert(top0);
+        d.start = y_scale.invert(top);
     };
 
     var resize_event = function(d, div){
