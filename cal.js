@@ -49,20 +49,41 @@ function cal(id){
     // Drag behaviour for draging and resizeing calendar events.
     var resizebehaviour = d3.behavior.drag()
         .on('dragstart', function(d){
+            var parent = d3.select(this.parentNode);
+            var div = d3.select(this);
+            parent.classed('selected', true);
+            div.style('z-index', 2);
+            parent.style('z-index', 1);
             d3.event.sourceEvent.stopPropagation();
         })
         .on('drag', function(d){
             resize_event(d, d3.select(this.parentNode));
         })
         .on('dragend', function(d){
-            resizeend_event(d, d3.select(this.parentNode));
+            var parent = d3.select(this.parentNode);
+            var div = d3.select(this);
+            parent.classed('selected', false);
+            parent.style('z-index', 0);
+            div.style('z-index', 0);
+            resizeend_event(d, parent);
             ease();
         });
 
     var dragbehaviour = d3.behavior.drag()
-        .on('drag', function(d){ drag_event(d, d3.select(this)) })
+        .on('dragstart', function(d){
+            var div = d3.select(this);
+            div.style('z-index', 1);
+            div.classed('selected', true);
+            drag_event(d, div);
+        })
+        .on('drag', function(d){
+            drag_event(d, d3.select(this));
+        })
         .on('dragend', function(d){
-            dragend_event(d, d3.select(this));
+            var div = d3.select(this);
+            div.style('z-index', 0);
+            div.classed('selected', false);
+            dragend_event(d, div);
             ease();
         });
 
